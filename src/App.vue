@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <router-link to="/">home</router-link>
+    <i style="display: inline-block; margin:0 10px">|</i>
+    <router-link to="/multi">multi</router-link>
     <router-view/>
   </div>
 </template>

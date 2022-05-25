@@ -19,7 +19,8 @@ export default {
     height: Number,
     position: Object,
     // 当前元素是否被选中
-    isFocus: Boolean
+    isFocus: Boolean,
+    index: String
   },
   data () {
     return {
@@ -60,6 +61,7 @@ export default {
   },
   computed: {
     styleObject () {
+      // debugger
       return {
         width: this.width + 'px',
         height: this.height + 'px',
@@ -70,7 +72,13 @@ export default {
   },
   methods: {
     handleFocus () {
-      this.$emit('changeFocus', true)
+      debugger
+      // 判断是多元素还是单元素
+      if (this.index) {
+        this.$emit('changeFocus', { index: this.index, flag: true })
+      } else {
+        this.$emit('changeFocus', { flag: true })
+      }
       // 当聚焦的时候给页面绑定点击事件
       // 给页面绑定事件，当点击页面的时候，取消所有元素的选中状态
       document.addEventListener('click', this.foo)

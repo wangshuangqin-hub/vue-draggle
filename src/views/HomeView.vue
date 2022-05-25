@@ -36,7 +36,7 @@ export default {
     }
   },
   methods: {
-    changeFocus (flag) {
+    changeFocus ({ flag }) {
       this.imgOptions.isFocus = flag
     },
     changeSize ({ width, height, left, top }) {
