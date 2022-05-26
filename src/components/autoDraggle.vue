@@ -1,9 +1,13 @@
 <template>
   <div class="auto-container" :style="styleObject" ref="autoContainer" data-title="substance">
     <!-- 遮罩层 -->
-    <div class="mask" v-if="isFocus">
+    <div class="mask" id="mask" v-if="isFocus">
       <!-- 给选中样式增加时间，拖拽可已改变大小 -->
-      <div v-for="i in 8" :key="i" class="selected-item" :ref="'selecteditem'+i" @mousedown="handleMouseDown(i,$event)"></div>
+      <div v-for="i in 8" :key="i" class="selected-item" :ref="'selecteditem'+i" @mousedown.prevent.stop="handleMouseDown(i,$event)"></div>
+      <!-- 坐标线位置 -->
+      <span class="vue-draggle__position">{{position.left+','+position.top}}</span>
+      <div class="vue-draggle__line vue-draggle__line-top"></div>
+      <div class="vue-draggle__line vue-draggle__line-left"></div>
     </div>
     <div @click.prevent.stop="handleFocus" class="auto-dom" ref="autodom">
       <slot></slot>
@@ -12,6 +16,7 @@
 </template>
 
 <script>
+
 export default {
   name: 'HelloWorld',
   props: {
@@ -24,7 +29,8 @@ export default {
   },
   data () {
     return {
-      // isFocus: false
+      isDraggle: true,
+      elTargetClassName: ''
     }
   },
   mounted () {
@@ -41,13 +47,16 @@ export default {
         console.log(offsetLeftX, offsetTopY)
         // 在这里绑定事件，点击空白位置，取消选中状态
         document.onmousemove = (e) => {
-          console.log(2222222222)
           // 判断当前元素是否是选中状态，只有选中状态得元素才可以拖动
           // 获取鼠标得平移位置，重新赋值给盒子
           const disX = e.clientX - ev.clientX
           const disY = e.clientY - ev.clientY
-          autoContainer.style.left = offsetLeftX + disX + 'px'
-          autoContainer.style.top = offsetTopY + disY + 'px'
+          // autoContainer.style.left = offsetLeftX + disX + 'px'
+          // autoContainer.style.top = offsetTopY + disY + 'px'
+          const leftP = offsetLeftX + disX
+          const topP = offsetTopY + disY
+          // 修改元素对象的便宜位置
+          _this.$emit('changePosition', { left: leftP, top: topP, index: _this.index })
         }
         // 鼠标弹起的时候解绑事件
         document.onmouseup = () => {
@@ -61,7 +70,6 @@ export default {
   },
   computed: {
     styleObject () {
-      // debugger
       return {
         width: this.width + 'px',
         height: this.height + 'px',
@@ -72,7 +80,6 @@ export default {
   },
   methods: {
     handleFocus () {
-      debugger
       // 判断是多元素还是单元素
       if (this.index) {
         this.$emit('changeFocus', { index: this.index, flag: true })
@@ -84,20 +91,49 @@ export default {
       document.addEventListener('click', this.foo)
     },
     // 取消选中状态
-    foo () {
-      this.$emit('changeFocus', false)
-      document.removeEventListener('click', this.foo)
+    foo (e) {
+      // 如果是拖拽元素，则不取消聚焦状态
+      // this.isDraggle为true的时候，代表点击拖拽点，此时不隐藏，当为拖拽时，也不隐藏
+      console.log(e, '当前点击的元素', this.isDraggle)
+      // 判断最终鼠标落下的位置是否在元素范围之内，如果是在范围之类，则不取消选中，否则取消
+      const mouseClickX = e.clientX
+      const mouseClickY = e.clientY
+      // 获取此时聚焦元素的位置和偏移量
+      const autoContainer = this.$refs.autoContainer
+      // 加15px是因为遮罩层比元素多偏移了10px，扩大点击范围,小方块的一半距离是5px
+      // 上偏移量
+      const T0 = autoContainer.offsetTop - 15
+      // 垂直方向范围大小
+      const B0 = autoContainer.offsetTop + autoContainer.offsetHeight + 15
+      // 左偏移量
+      const L0 = autoContainer.offsetLeft - 15
+      // 水平方向范围
+      const R0 = autoContainer.offsetLeft + autoContainer.offsetWidth + 15
+      /* 落点位置有两种情况；1鼠标最终落点落在了矩形内部，则不取消focus状态  2,当鼠标依次拖动上下左右四个单边的时候，鼠标的某一坐标值与鼠标落点一致，则也不取消focus状态 */
+      const flagCenter = mouseClickX < L0 || mouseClickX > R0 || mouseClickY < T0 || mouseClickY > B0
+      // 鼠标落在元素边界点的位置(左 ，上，右，下)
+      console.log(autoContainer, '当前元素是谁')
+      if (flagCenter) {
+        console.log(flagCenter, '是否触发')
+        // 如果当前点击的元素不是小蓝点的时候，判断用户是否是拖拽或者点击了
+        this.$emit('changeFocus', false)
+        document.removeEventListener('click', this.foo)
+      }
     },
     handleMouseDown (i, ev) {
       // 小点的拖拽事件
       const _this = this
+      let firstTime = ''
+      let lastTime = ''
       const autoContainer = this.$refs.autoContainer
-      console.log(i, ev, '当前点击的元素是啥')
+      this.elTargetClassName = ev.target.className
+      console.log(i, ev.target.className, '当前点击的元素是啥')
+      // 给拖拽点增加标识，判断用户是推拽还是点击
+      firstTime = new Date().getTime()
       // 记录鼠标结束的位置
       const mouseDownX = ev.clientX
       const mouseDownY = ev.clientY
       // 要判断鼠标是往那个方向拖动，应该获取目标元素的偏移量和宽高
-
       const T0 = autoContainer.offsetTop
       const B0 = autoContainer.offsetTop + autoContainer.offsetHeight
       const L0 = autoContainer.offsetLeft
@@ -113,10 +149,10 @@ export default {
       const changeT = mouseDownY <= T0
       // 下
       const changeB = mouseDownY >= B0
-      console.log(changeL, '左', changeR, '右', changeT, '上', changeB, '下', '判断当前点击的是哪一个方向')
       if (autoContainer.setCapture) {
         autoContainer.setCapture()
       }
+      ev.stopPropagation()
       document.onmousemove = (e) => {
         // 记录鼠标结束的坐标位置
         // debugger
@@ -145,17 +181,27 @@ export default {
         }
         console.log(width, height, left, top)
         // 改变父组件大小的值
-        _this.$emit('changeSize', { width, height, left, top })
+        _this.$emit('changeSize', { width, height, left, top, index: this.index })
+        e.stopPropagation()
       }
       // 鼠标弹起的时候解绑事件
-      document.onmouseup = () => {
+      document.onmouseup = (el) => {
+        el.stopPropagation()
         document.onmousemove = document.onmouseup = null
+        lastTime = new Date().getTime()
+        // debugger
+        if ((lastTime - firstTime) < 200) {
+          // 代表此时是点击事件
+          _this.isDraggle = true
+        } else {
+          // 代表此时是拖拽事件
+          _this.isDraggle = false
+        }
         // 释放全局捕获
         if (autoContainer.releaseCapture) {
           autoContainer.releaseCapture()
         }
       }
-      ev.preventDefault()
     }
   }
 }
@@ -180,7 +226,7 @@ img {
 .selected-item {
   width: 10px;
   height: 10px;
-  background: #2d7ff0;
+  background: blue;
   position: absolute;
   z-index: 2;
 }
@@ -229,7 +275,30 @@ img {
   /* background: palegoldenrod; */
   opacity: 0.3;
   z-index: 1;
-  border:1px solid #2d7ff0;
+  border:1px solid blue;
+}
+.vue-draggle__line {
+  position: absolute;
+}
+.vue-draggle__line-left {
+  width: 10000px;
+  height: 0;
+  border-top:1px dashed blue;
+  top: 0;
+  transform: translateX(-100%);
+}
+.vue-draggle__line-top {
+  width: 0;
+  height: 10000px;
+  border-left:1px dashed blue;
+  top: 0;
+  transform: translateY(-100%);
+}
+.vue-draggle__position {
+  position: absolute;
+  left: -70px;
+  top: -25px;
+  color:blue;
 }
 /* 设置选中样式的位置 */
 </style>

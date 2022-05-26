@@ -7,7 +7,8 @@
       :position="imgOptions.position"
       :isFocus="imgOptions.isFocus"
       @changeFocus="changeFocus"
-      @changeSize="changeSize">
+      @changeSize="changeSize"
+      @changePosition="changePosition">
       <img src="../assets/logo.png" alt="">
     </autoDraggle>
   </div>
@@ -52,6 +53,10 @@ export default {
       if (top) {
         this.imgOptions.position.top = top
       }
+    },
+    changePosition ({ left, top }) {
+      this.imgOptions.position.left = left
+      this.imgOptions.position.top = top
     }
   }
 }

@@ -9,8 +9,9 @@
             :position="item.position"
             :isFocus="item.isFocus"
             @changeFocus="changeFocus"
-            @changeSize="changeSize">
-            <component v-bind:is="currentTabComponent"></component>
+            @changeSize="changeSize"
+            @changePosition="changePosition">
+            <component v-bind:is="item.type"></component>
           </auto-draggle>
       </div>
     </template>
@@ -26,45 +27,6 @@ export default {
     imgDraggle,
     formDraggle
   },
-  /*         {
-          width: 100,
-          height: 100,
-          // 当前用户是否处于选中状态
-          isFocus: false,
-          position: {
-            left: 100,
-            top: 100
-          },
-          style: {
-            backgroundColor: 'red'
-          }
-        },
-        {
-          width: 200,
-          height: 200,
-          // 当前用户是否处于选中状态
-          isFocus: false,
-          position: {
-            left: 300,
-            top: 300
-          },
-          style: {
-            backgroundColor: 'green'
-          }
-        },
-        {
-          width: 300,
-          height: 300,
-          // 当前用户是否处于选中状态
-          isFocus: false,
-          position: {
-            left: 500,
-            top: 500
-          },
-          style: {
-            backgroundColor: 'yellow'
-          }
-        } */
   data () {
     return {
       currentTabComponent: 'imgDraggle',
@@ -83,20 +45,69 @@ export default {
           },
           style: {
             backgroundColor: 'green'
-          }
+          },
+          type: 'imgDraggle'
+        },
+        {
+          index: '456',
+          width: 300,
+          height: 300,
+          // 当前用户是否处于选中状态
+          isFocus: false,
+          position: {
+            left: 500,
+            top: 500
+          },
+          style: {
+            backgroundColor: 'yellow'
+          },
+          type: 'formDraggle'
         }
       ]
     }
   },
   methods: {
     changeFocus ({ index, flag }) {
+      // 只有点击空白页面的时候，才会传递false,这个时候取消所有选中元素的focus
+      if (!flag) {
+        this.draggleList.forEach(item => { item.isFocus = false })
+        return
+      }
+      if (index) {
+        const indexValue = this.draggleList.findIndex(item => {
+          return item.index === index
+        })
+        this.draggleList[indexValue].isFocus = flag
+      }
+    },
+    changeSize ({ width, height, left, top, index }) {
+      // debugger
+      // 找到需要操作的元素
       const indexValue = this.draggleList.findIndex(item => {
         return item.index === index
       })
-      this.draggleList[indexValue].isFocus = flag
+      const optionsObject = this.draggleList[indexValue]
+      console.log(this.draggleList[indexValue].position, '移动结束的坐标位置')
+      if (width) {
+        optionsObject.width = width
+      }
+      if (height) {
+        optionsObject.height = height
+      }
+      if (left) {
+        optionsObject.position.left = left
+      }
+      if (top) {
+        optionsObject.position.top = top
+      }
     },
-    changeSize () {
-
+    changePosition ({ left, top, index }) {
+      const indexValue = this.draggleList.findIndex(item => {
+        return item.index === index
+      })
+      const optionsObject = this.draggleList[indexValue]
+      optionsObject.position.left = left
+      optionsObject.position.top = top
     }
   }
 }
