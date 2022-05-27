@@ -30,6 +30,7 @@ export default {
   data () {
     return {
       currentTabComponent: 'imgDraggle',
+      isCtrl: false,
       // 先准备一个默认的值
       draggleList: [
         {
@@ -66,6 +67,11 @@ export default {
       ]
     }
   },
+  created () {
+    document.onkeydown = (e) => {
+      this.isCtrl = e.keyCode === 17
+    }
+  },
   methods: {
     changeFocus ({ index, flag }) {
       // 只有点击空白页面的时候，才会传递false,这个时候取消所有选中元素的focus
@@ -74,10 +80,14 @@ export default {
         return
       }
       if (index) {
-        const indexValue = this.draggleList.findIndex(item => {
-          return item.index === index
+        // 当前点击的元素变成聚焦状态，其他元素失去焦点
+        this.draggleList.forEach(item => {
+          if (item.index === index) {
+            item.isFocus = flag
+          } else {
+            item.isFocus = !flag
+          }
         })
-        this.draggleList[indexValue].isFocus = flag
       }
     },
     changeSize ({ width, height, left, top, index }) {

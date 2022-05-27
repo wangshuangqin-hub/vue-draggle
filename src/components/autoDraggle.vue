@@ -30,7 +30,17 @@ export default {
   data () {
     return {
       isDraggle: true,
-      elTargetClassName: ''
+      elTargetClassName: '',
+      isDocument: false
+    }
+  },
+  created () {
+    const _this = this
+    document.onmousedown = (e) => {
+      _this.isDocument = true
+      // 当点击页面的时候，取消focus状态
+      // 给页面绑定事件，当点击页面的时候，取消所有元素的选中状态
+      document.addEventListener('mouseup', this.foo)
     }
   },
   mounted () {
@@ -80,56 +90,26 @@ export default {
   },
   methods: {
     handleFocus () {
-      // 判断是多元素还是单元素
-      if (this.index) {
-        this.$emit('changeFocus', { index: this.index, flag: true })
-      } else {
-        this.$emit('changeFocus', { flag: true })
-      }
-      // 当聚焦的时候给页面绑定点击事件
-      // 给页面绑定事件，当点击页面的时候，取消所有元素的选中状态
-      document.addEventListener('click', this.foo)
+      this.$emit('changeFocus', { index: this.index, flag: true })
     },
     // 取消选中状态
     foo (e) {
-      // 如果是拖拽元素，则不取消聚焦状态
-      // this.isDraggle为true的时候，代表点击拖拽点，此时不隐藏，当为拖拽时，也不隐藏
-      console.log(e, '当前点击的元素', this.isDraggle)
-      // 判断最终鼠标落下的位置是否在元素范围之内，如果是在范围之类，则不取消选中，否则取消
-      const mouseClickX = e.clientX
-      const mouseClickY = e.clientY
-      // 获取此时聚焦元素的位置和偏移量
-      const autoContainer = this.$refs.autoContainer
-      // 加15px是因为遮罩层比元素多偏移了10px，扩大点击范围,小方块的一半距离是5px
-      // 上偏移量
-      const T0 = autoContainer.offsetTop - 15
-      // 垂直方向范围大小
-      const B0 = autoContainer.offsetTop + autoContainer.offsetHeight + 15
-      // 左偏移量
-      const L0 = autoContainer.offsetLeft - 15
-      // 水平方向范围
-      const R0 = autoContainer.offsetLeft + autoContainer.offsetWidth + 15
-      /* 落点位置有两种情况；1鼠标最终落点落在了矩形内部，则不取消focus状态  2,当鼠标依次拖动上下左右四个单边的时候，鼠标的某一坐标值与鼠标落点一致，则也不取消focus状态 */
-      const flagCenter = mouseClickX < L0 || mouseClickX > R0 || mouseClickY < T0 || mouseClickY > B0
-      // 鼠标落在元素边界点的位置(左 ，上，右，下)
-      console.log(autoContainer, '当前元素是谁')
-      if (flagCenter) {
-        console.log(flagCenter, '是否触发')
-        // 如果当前点击的元素不是小蓝点的时候，判断用户是否是拖拽或者点击了
+      if (this.isDocument) {
         this.$emit('changeFocus', false)
-        document.removeEventListener('click', this.foo)
+        document.removeEventListener('mouseup', this.foo)
       }
     },
     handleMouseDown (i, ev) {
       // 小点的拖拽事件
       const _this = this
-      let firstTime = ''
-      let lastTime = ''
+      // let firstTime = ''
+      // let lastTime = ''
+      this.isDocument = false
       const autoContainer = this.$refs.autoContainer
       this.elTargetClassName = ev.target.className
       console.log(i, ev.target.className, '当前点击的元素是啥')
       // 给拖拽点增加标识，判断用户是推拽还是点击
-      firstTime = new Date().getTime()
+      // firstTime = new Date().getTime()
       // 记录鼠标结束的位置
       const mouseDownX = ev.clientX
       const mouseDownY = ev.clientY
@@ -179,7 +159,7 @@ export default {
         if (changeB) {
           height = mouseMoveY - mouseDownY + H
         }
-        console.log(width, height, left, top)
+        // console.log(width, height, left, top)
         // 改变父组件大小的值
         _this.$emit('changeSize', { width, height, left, top, index: this.index })
         e.stopPropagation()
@@ -188,15 +168,14 @@ export default {
       document.onmouseup = (el) => {
         el.stopPropagation()
         document.onmousemove = document.onmouseup = null
-        lastTime = new Date().getTime()
-        // debugger
-        if ((lastTime - firstTime) < 200) {
-          // 代表此时是点击事件
-          _this.isDraggle = true
-        } else {
-          // 代表此时是拖拽事件
-          _this.isDraggle = false
-        }
+        // lastTime = new Date().getTime()
+        // if ((lastTime - firstTime) < 200) {
+        //   // 代表此时是点击事件
+        //   _this.isDraggle = true
+        // } else {
+        //   // 代表此时是拖拽事件
+        //   _this.isDraggle = false
+        // }
         // 释放全局捕获
         if (autoContainer.releaseCapture) {
           autoContainer.releaseCapture()
