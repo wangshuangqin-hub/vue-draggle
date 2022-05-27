@@ -16,21 +16,29 @@
           </auto-draggle>
       </div>
     </template>
+    <!-- 右侧展示属性栏 -->
+    <div class="attribute-wrapper" v-if="attributeObj">
+      <attribute v-bind="attributeObj"></attribute>
+    </div>
   </div>
 </template>
 <script>
 import autoDraggle from '@/components/autoDraggle.vue'
 import imgDraggle from '@/components/img.vue'
 import formDraggle from '@/components/form.vue'
+import attribute from '@/components/attribute.vue'
 export default {
   components: {
     autoDraggle,
     imgDraggle,
-    formDraggle
+    formDraggle,
+    attribute
   },
   data () {
     return {
       isCtrls: false,
+      // 属性面板名称
+      attributeObj: null,
       // 先准备一个默认的值
       draggleList: [
         {
@@ -47,7 +55,8 @@ export default {
           style: {
             backgroundColor: 'green'
           },
-          type: 'imgDraggle'
+          type: 'imgDraggle',
+          title: '图片组件'
         },
         {
           index: '456',
@@ -62,7 +71,8 @@ export default {
           style: {
             backgroundColor: 'yellow'
           },
-          type: 'formDraggle'
+          type: 'formDraggle',
+          title: '表单组件'
         }
       ]
     }
@@ -91,6 +101,7 @@ export default {
           this.draggleList.forEach(item => {
             if (item.index === index) {
               item.isFocus = flag
+              this.attributeObj = item
             } else {
               item.isFocus = !flag
             }
@@ -147,6 +158,15 @@ export default {
   }
 }
 </script>
-<style  scoped lang='scss'>
-
+<style  scoped>
+.attribute-wrapper {
+  width: 350px;
+  position: fixed;
+  right: 0;
+  height: 100%;
+  top: 0;
+  box-shadow: -5px 0 10px rgba(0, 0, 0, .1);
+  z-index: 99;
+  background-color: #fff;
+}
 </style>
