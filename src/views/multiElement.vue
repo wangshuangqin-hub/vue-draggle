@@ -10,7 +10,8 @@
             :isFocus="item.isFocus"
             @changeFocus="changeFocus"
             @changeSize="changeSize"
-            @changePosition="changePosition">
+            @changePosition="changePosition"
+            @handleMulti="handleMulti">
             <component v-bind:is="item.type"></component>
           </auto-draggle>
       </div>
@@ -29,8 +30,7 @@ export default {
   },
   data () {
     return {
-      currentTabComponent: 'imgDraggle',
-      isCtrl: false,
+      isCtrls: false,
       // 先准备一个默认的值
       draggleList: [
         {
@@ -67,27 +67,35 @@ export default {
       ]
     }
   },
-  created () {
-    document.onkeydown = (e) => {
-      this.isCtrl = e.keyCode === 17
-    }
-  },
   methods: {
+    // 当前是否是多选元素
+    handleMulti (ctrlFlag) {
+      this.isCtrls = ctrlFlag
+    },
     changeFocus ({ index, flag }) {
+      // debugger
       // 只有点击空白页面的时候，才会传递false,这个时候取消所有选中元素的focus
       if (!flag) {
         this.draggleList.forEach(item => { item.isFocus = false })
         return
       }
       if (index) {
-        // 当前点击的元素变成聚焦状态，其他元素失去焦点
-        this.draggleList.forEach(item => {
-          if (item.index === index) {
-            item.isFocus = flag
-          } else {
-            item.isFocus = !flag
+        // 当前点击的元素变成聚焦状态，其他元素失去焦点(如果按住ctrl多选元素，则点击的元素都变成聚焦状态)
+        if (this.isCtrls) {
+          // 多选
+          const indexFocus = this.draggleList.findIndex(item => item.index === index)
+          if (indexFocus > -1) {
+            this.draggleList[indexFocus].isFocus = flag
           }
-        })
+        } else {
+          this.draggleList.forEach(item => {
+            if (item.index === index) {
+              item.isFocus = flag
+            } else {
+              item.isFocus = !flag
+            }
+          })
+        }
       }
     },
     changeSize ({ width, height, left, top, index }) {
@@ -112,12 +120,29 @@ export default {
       }
     },
     changePosition ({ left, top, index }) {
-      const indexValue = this.draggleList.findIndex(item => {
-        return item.index === index
-      })
-      const optionsObject = this.draggleList[indexValue]
-      optionsObject.position.left = left
-      optionsObject.position.top = top
+      // 判断的当前是多选元素还是单选元素，如果是多选元素，则一起移动
+      if (this.isCtrls) {
+        this.draggleList.forEach((item, index) => {
+          if (item.isFocus) {
+            // if (item.index === index) {
+            // item.position.left = left
+            // item.position.top = top
+            // } else {
+            //   const disX = localStorage.getItem('disX') * 1 + item.position.left
+            //   const disY = localStorage.getItem('disY') * 1 + item.position.top
+            //   item.position.left = disX
+            //   item.position.top = disY
+            // }
+          }
+        })
+      } else {
+        const indexValue = this.draggleList.findIndex(item => {
+          return item.index === index
+        })
+        const optionsObject = this.draggleList[indexValue]
+        optionsObject.position.left = left
+        optionsObject.position.top = top
+      }
     }
   }
 }

@@ -31,7 +31,9 @@ export default {
     return {
       isDraggle: true,
       elTargetClassName: '',
-      isDocument: false
+      isDocument: false,
+      // 用户当前是否按住多选了
+      isCtrl: false
     }
   },
   created () {
@@ -49,22 +51,19 @@ export default {
     autoDraggle.addEventListener('mousedown', function (ev) {
       // 当元素被聚焦的时候才允许移动或改变大小
       if (_this.isFocus) {
-        // 获取最外层盒子的偏移量
-        const autoContainer = _this.$refs.autoContainer
-        // 获取盒子距离浏览器可视窗口的水平距离和垂直距离
-        const offsetLeftX = autoContainer.offsetLeft
-        const offsetTopY = autoContainer.offsetTop
-        console.log(offsetLeftX, offsetTopY)
+        const offsetLeftX = _this.position.left
+        const offsetTopY = _this.position.top
         // 在这里绑定事件，点击空白位置，取消选中状态
         document.onmousemove = (e) => {
           // 判断当前元素是否是选中状态，只有选中状态得元素才可以拖动
           // 获取鼠标得平移位置，重新赋值给盒子
           const disX = e.clientX - ev.clientX
           const disY = e.clientY - ev.clientY
-          // autoContainer.style.left = offsetLeftX + disX + 'px'
-          // autoContainer.style.top = offsetTopY + disY + 'px'
           const leftP = offsetLeftX + disX
           const topP = offsetTopY + disY
+          // 将鼠标移动的平移距离存储再内存控件，供多选元素移动时使用
+          // localStorage.setItem('disX', disX)
+          // localStorage.setItem('disY', disY)
           // 修改元素对象的便宜位置
           _this.$emit('changePosition', { left: leftP, top: topP, index: _this.index })
         }
@@ -90,13 +89,51 @@ export default {
   },
   methods: {
     handleFocus () {
+      const _this = this
       this.$emit('changeFocus', { index: this.index, flag: true })
+      // 绑定键盘事件，控制元素上下左右移动，每次按照1px移动，目前先写死
+      document.onkeydown = (e) => {
+        console.log(_this.index, '当前激活元素的索引')
+        // 元素不能写死，要获取获得焦点的元素
+        if (_this.isFocus) {
+          let leftKx = _this.position.left
+          let TopKy = _this.position.top
+          switch (e.keyCode) {
+            case 38:
+              // 上
+              TopKy -= 1
+              break
+            case 39:
+              // 右
+              leftKx += 1
+              break
+            case 40:
+              // 下
+              TopKy += 1
+              break
+            case 37:
+              // 左
+              leftKx -= 1
+              break
+            case 17:
+              _this.$emit('handleMulti', true)
+          }
+          // 只有按住方向键的时候才改变元素位置
+          if ([37, 38, 39, 40].includes(e.keyCode)) {
+            _this.$emit('changePosition', { left: leftKx, top: TopKy, index: _this.index })
+          }
+        }
+      }
     },
     // 取消选中状态
     foo (e) {
       if (this.isDocument) {
         this.$emit('changeFocus', false)
+        // 当点击页面之后，取消所有元素选中，那么也同时取消多选
+        this.$emit('handleMulti', false)
         document.removeEventListener('mouseup', this.foo)
+        // 这个时候也移除页面的键盘事件
+        document.onkeydown = null
       }
     },
     handleMouseDown (i, ev) {
