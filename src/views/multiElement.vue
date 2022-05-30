@@ -128,7 +128,6 @@ export default {
       }
     },
     changeSize ({ width, height, left, top, index }) {
-      // debugger
       // 找到需要操作的元素
       const indexValue = this.draggleList.findIndex(item => {
         return item.index === index

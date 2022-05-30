@@ -1,0 +1,23 @@
+{
+  "id": "3437542",
+  "name": "vue-draggle",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "3216527",
+      "name": "撤回",
+      "font_class": "chehui",
+      "unicode": "e66b",
+      "unicode_decimal": 58987
+    },
+    {
+      "icon_id": "7120780",
+      "name": "重做",
+      "font_class": "zhongzuo",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    }
+  ]
+}
