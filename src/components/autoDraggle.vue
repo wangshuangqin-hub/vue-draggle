@@ -49,21 +49,10 @@ export default {
     const _this = this
     const autoDraggle = this.$refs.autodom
     autoDraggle.addEventListener('mousedown', function (ev) {
-      console.log('1.ev.clientX================>' + ev.clientX)
-      console.log('1.ev.clientY================>' + ev.clientY)
       // 当元素被聚焦的时候才允许移动或改变大小
       if (_this.isFocus) {
         if (!document.onmousemove) {
-          // 在这里绑定事件，点击空白位置，取消选中状态
           document.onmousemove = (e) => {
-            // 判断当前元素是否是选中状态，只有选中状态得元素才可以拖动
-            // 获取鼠标得平移位置，重新赋值给盒子
-            // const leftP = offsetLeftX + disX
-            // const topP = offsetTopY + disY
-            // 将鼠标移动的平移距离存储再内存控件，供多选元素移动时使用
-            // localStorage.setItem('disX', disX)
-            // localStorage.setItem('disY', disY)
-            // 修改元素对象的便宜位置
             _this.$emit('changePosition', { left: e.movementX, top: e.movementY, index: _this.index })
           }
         }

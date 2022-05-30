@@ -1,6 +1,17 @@
 <template>
-  <div>
-    <template v-for="(item,index) in draggleList">
+  <div class="layer-content">
+    <!-- 头部工具栏 -->
+    <div class="multi-container">工具栏</div>
+    <!-- 元素面板区域 -->
+    <div class="layer-container">
+      <!-- 左侧元素控件区域 -->
+      <div class="layer-left"></div>
+      <!-- 中间布局区域 -->
+      <div class="layer-center"></div>
+      <!-- 右侧属性栏区域 -->
+      <div class="layer-right"></div>
+    </div>
+    <!-- <template v-for="(item,index) in draggleList">
       <div :key="index">
           <auto-draggle
             v-bind="item"
@@ -15,26 +26,26 @@
             <component v-bind:is="item.type"></component>
           </auto-draggle>
       </div>
-    </template>
+    </template> -->
     <!-- 右侧展示属性栏 -->
-    <div class="attribute-wrapper" v-if="attributeObj">
+    <!-- <div class="attribute-wrapper" v-if="attributeObj">
       <attribute v-bind="attributeObj"></attribute>
-    </div>
+    </div> -->
   </div>
 </template>
 <script>
-import autoDraggle from '@/components/autoDraggle.vue'
-import imgDraggle from '@/components/img.vue'
-import formDraggle from '@/components/form.vue'
-import attribute from '@/components/attribute.vue'
-import treeDate from '@/components/tree.vue'
+// import autoDraggle from '@/components/autoDraggle.vue'
+// import imgDraggle from '@/components/img.vue'
+// import formDraggle from '@/components/form.vue'
+// import attribute from '@/components/attribute.vue'
+// import treeDate from '@/components/tree.vue'
 export default {
   components: {
-    autoDraggle,
-    imgDraggle,
-    formDraggle,
-    attribute,
-    treeDate
+    // autoDraggle,
+    // imgDraggle,
+    // formDraggle,
+    // attribute,
+    // treeDate
   },
   data () {
     return {
@@ -168,15 +179,22 @@ export default {
   }
 }
 </script>
-<style  scoped>
-.attribute-wrapper {
-  width: 350px;
-  position: fixed;
-  right: 0;
+<style  scoped lang="scss">
+.layer-content {
   height: 100%;
-  top: 0;
-  box-shadow: -5px 0 10px rgba(0, 0, 0, .1);
-  z-index: 99;
-  background-color: #fff;
+  .multi-container {
+    height: 60px;
+    line-height: 60px;
+    background-color: antiquewhite;
+  }
+  .layer-container {
+    background-color: pink;
+    height: calc(100% - 60px);
+    .layer-left {
+      width: 350px;
+      height: 100%;
+      background-color: deeppink;
+    }
+  }
 }
 </style>
