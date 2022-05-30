@@ -49,27 +49,29 @@ export default {
     const _this = this
     const autoDraggle = this.$refs.autodom
     autoDraggle.addEventListener('mousedown', function (ev) {
+      console.log('1.ev.clientX================>' + ev.clientX)
+      console.log('1.ev.clientY================>' + ev.clientY)
       // 当元素被聚焦的时候才允许移动或改变大小
       if (_this.isFocus) {
-        const offsetLeftX = _this.position.left
-        const offsetTopY = _this.position.top
-        // 在这里绑定事件，点击空白位置，取消选中状态
-        document.onmousemove = (e) => {
-          // 判断当前元素是否是选中状态，只有选中状态得元素才可以拖动
-          // 获取鼠标得平移位置，重新赋值给盒子
-          const disX = e.clientX - ev.clientX
-          const disY = e.clientY - ev.clientY
-          const leftP = offsetLeftX + disX
-          const topP = offsetTopY + disY
-          // 将鼠标移动的平移距离存储再内存控件，供多选元素移动时使用
-          // localStorage.setItem('disX', disX)
-          // localStorage.setItem('disY', disY)
-          // 修改元素对象的便宜位置
-          _this.$emit('changePosition', { left: leftP, top: topP, index: _this.index })
+        if (!document.onmousemove) {
+          // 在这里绑定事件，点击空白位置，取消选中状态
+          document.onmousemove = (e) => {
+            // 判断当前元素是否是选中状态，只有选中状态得元素才可以拖动
+            // 获取鼠标得平移位置，重新赋值给盒子
+            // const leftP = offsetLeftX + disX
+            // const topP = offsetTopY + disY
+            // 将鼠标移动的平移距离存储再内存控件，供多选元素移动时使用
+            // localStorage.setItem('disX', disX)
+            // localStorage.setItem('disY', disY)
+            // 修改元素对象的便宜位置
+            _this.$emit('changePosition', { left: e.movementX, top: e.movementY, index: _this.index })
+          }
         }
         // 鼠标弹起的时候解绑事件
-        document.onmouseup = () => {
-          document.onmousemove = document.onmouseup = null
+        if (!document.onmouseup) {
+          document.onmouseup = () => {
+            document.onmousemove = document.onmouseup = null
+          }
         }
       }
       // 阻止默认事件，防止小bug
@@ -96,34 +98,50 @@ export default {
         console.log(_this.index, '当前激活元素的索引')
         // 元素不能写死，要获取获得焦点的元素
         if (_this.isFocus) {
-          let leftKx = _this.position.left
-          let TopKy = _this.position.top
+          // let leftKx = _this.position.left
+          // let TopKy = _this.position.top
+          const offsetParam = {
+            top: 0,
+            left: 0,
+            index: _this.index
+          }
           switch (e.keyCode) {
             case 38:
               // 上
-              TopKy -= 1
+              // TopKy -= 1
+              offsetParam.top = -1
               break
             case 39:
               // 右
-              leftKx += 1
+              // leftKx += 1
+              offsetParam.left = 1
               break
             case 40:
               // 下
-              TopKy += 1
+              // TopKy += 1
+              offsetParam.top = 1
               break
             case 37:
               // 左
-              leftKx -= 1
+              // leftKx -= 1
+              offsetParam.left = -1
               break
             case 17:
               _this.$emit('handleMulti', true)
           }
           // 只有按住方向键的时候才改变元素位置
           if ([37, 38, 39, 40].includes(e.keyCode)) {
-            _this.$emit('changePosition', { left: leftKx, top: TopKy, index: _this.index })
+            // _this.$emit('changePosition', { left: leftKx, top: TopKy, index: _this.index })
+            _this.$emit('changePosition', offsetParam)
           }
         }
       }
+      // // 绑定键盘弹起事件，一旦弹起，取消元素多选开关，让用户变成单选
+      // document.onkeyup = (e) => {
+      //   if (e.keyCode === 17) {
+      //     this.$emit('handleMulti', false)
+      //   }
+      // }
     },
     // 取消选中状态
     foo (e) {

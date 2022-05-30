@@ -55,10 +55,8 @@ export default {
       }
     },
     changePosition ({ left, top }) {
-      this.imgOptions.position.left = left
-      this.imgOptions.position.top = top
-      // this.imgOptions.position.left = this.imgOptions.position.left + left
-      // this.imgOptions.position.top = this.imgOptions.position.top + top
+      this.imgOptions.position.left += left
+      this.imgOptions.position.top += top
     }
   }
 }

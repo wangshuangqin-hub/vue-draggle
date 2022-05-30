@@ -27,12 +27,14 @@ import autoDraggle from '@/components/autoDraggle.vue'
 import imgDraggle from '@/components/img.vue'
 import formDraggle from '@/components/form.vue'
 import attribute from '@/components/attribute.vue'
+import treeDate from '@/components/tree.vue'
 export default {
   components: {
     autoDraggle,
     imgDraggle,
     formDraggle,
-    attribute
+    attribute,
+    treeDate
   },
   data () {
     return {
@@ -73,6 +75,22 @@ export default {
           },
           type: 'formDraggle',
           title: '表单组件'
+        },
+        {
+          index: '789',
+          width: 200,
+          height: 100,
+          // 当前用户是否处于选中状态
+          isFocus: false,
+          position: {
+            left: 300,
+            top: 500
+          },
+          style: {
+            backgroundColor: 'deeppink'
+          },
+          type: 'treeDate',
+          title: '树形组件'
         }
       ]
     }
@@ -135,15 +153,8 @@ export default {
       if (this.isCtrls) {
         this.draggleList.forEach((item, index) => {
           if (item.isFocus) {
-            // if (item.index === index) {
-            // item.position.left = left
-            // item.position.top = top
-            // } else {
-            //   const disX = localStorage.getItem('disX') * 1 + item.position.left
-            //   const disY = localStorage.getItem('disY') * 1 + item.position.top
-            //   item.position.left = disX
-            //   item.position.top = disY
-            // }
+            item.position.left += left
+            item.position.top += top
           }
         })
       } else {
@@ -151,8 +162,8 @@ export default {
           return item.index === index
         })
         const optionsObject = this.draggleList[indexValue]
-        optionsObject.position.left = left
-        optionsObject.position.top = top
+        optionsObject.position.left += left
+        optionsObject.position.top += top
       }
     }
   }
